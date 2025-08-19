@@ -1,25 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Heart, MessageCircle, Plus, Send } from 'lucide-react';
+import { buildApiUrl, getUploadUrl } from '../config/api';
 
 const FeedPage = ({ onNavigate }) => {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
+  const [newPostImage, setNewPostImage] = useState(null);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [comment, setComment] = useState('');
+  const [postIdForComment, setPostIdForComment] = useState(null);
 
   useEffect(() => {
     fetchPosts();
   }, []);
 
   const fetchPosts = () => {
-    fetch('http://localhost:5000/api/posts')
+    fetch(buildApiUrl('/api/posts'), {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
       .then(res => res.json())
       .then(data => setPosts(data))
       .catch(err => console.error('Erro ao buscar posts:', err));
   };
 
   const handleLike = (postId) => {
-    fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+    fetch(buildApiUrl(`/api/posts/${postId}/like`), {
       method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
     })
       .then(res => res.json())
       .then(() => fetchPosts())
@@ -29,23 +40,49 @@ const FeedPage = ({ onNavigate }) => {
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
 
-    fetch('http://localhost:5000/api/posts', {
+    const formData = new FormData();
+    formData.append('content', newPost);
+    if (newPostImage) {
+      formData.append('image', newPostImage);
+    }
+
+    fetch(buildApiUrl('/api/posts'), {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      body: JSON.stringify({
-        content: newPost,
-        author: 'Casal'
-      }),
+      body: formData,
     })
       .then(res => res.json())
       .then(() => {
         setNewPost('');
-        setShowNewPost(false);
-        fetchPosts();
+        setNewPostImage(null);
+        fetchPosts();  // Recarregar os posts após criar um novo
       })
       .catch(err => console.error('Erro ao criar post:', err));
+  };
+
+  const handleComment = (postId) => {
+    if (!comment.trim()) return;
+
+    fetch(buildApiUrl(`/api/posts/${postId}/comment`), {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        content: comment,
+        subject: 'Comentário no post', // Campo obrigatório
+      }),
+    })
+      .then(res => res.json())
+      .then(() => {
+        setComment('');
+        fetchPosts();  // Recarregar os posts após adicionar um comentário
+        setPostIdForComment(null);  // Fechar o campo de comentário
+      })
+      .catch(err => console.error('Erro ao comentar no post:', err));
   };
 
   const formatDate = (dateString) => {
@@ -65,7 +102,7 @@ const FeedPage = ({ onNavigate }) => {
       <header className="romantic-header py-4 px-4 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto flex items-center">
           <button 
-            onClick={() => onNavigate('home')}
+            onClick={() => onNavigate('/')}
             className="romantic-button-secondary p-2 mr-4"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -91,6 +128,13 @@ const FeedPage = ({ onNavigate }) => {
               placeholder="O que vocês estão fazendo? ❤️"
               className="romantic-input w-full h-24 resize-none mb-4"
             />
+            <div className="mb-4">
+              <input
+                type="file"
+                onChange={(e) => setNewPostImage(e.target.files[0])}
+                className="romantic-input w-full"
+              />
+            </div>
             <div className="flex gap-3">
               <button 
                 onClick={handleCreatePost}
@@ -136,7 +180,7 @@ const FeedPage = ({ onNavigate }) => {
               {post.image_filename && (
                 <div className="mb-4">
                   <img 
-                    src={`http://localhost:5000/static/uploads/${post.image_filename}`}
+                    src={getUploadUrl(post.image_filename)}
                     alt="Imagem do post"
                     className="w-full rounded-lg max-h-96 object-cover"
                   />
@@ -152,11 +196,33 @@ const FeedPage = ({ onNavigate }) => {
                   <Heart className="w-5 h-5 romantic-heart" />
                   <span className="text-sm">{post.likes}</span>
                 </button>
-                <button className="flex items-center gap-2 text-romantic-text hover:text-romantic-accent transition-colors">
+                <button 
+                  onClick={() => setPostIdForComment(post.id)} // Abrir campo para comentário
+                  className="flex items-center gap-2 text-romantic-text hover:text-romantic-accent transition-colors"
+                >
                   <MessageCircle className="w-5 h-5" />
                   <span className="text-sm">Comentar</span>
                 </button>
               </div>
+
+              {/* Seção de Comentários */}
+              {postIdForComment === post.id && (
+                <div className="mt-4">
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Escreva um comentário..."
+                    className="romantic-input w-full mb-2"
+                  />
+                  <button 
+                    onClick={() => handleComment(post.id)}
+                    className="romantic-button w-full"
+                    disabled={!comment.trim()}
+                  >
+                    Comentar
+                  </button>
+                </div>
+              )}
             </article>
           ))}
         </div>
@@ -176,4 +242,3 @@ const FeedPage = ({ onNavigate }) => {
 };
 
 export default FeedPage;
-

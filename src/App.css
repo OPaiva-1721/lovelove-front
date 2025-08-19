@@ -282,6 +282,31 @@
   animation: fadeInUp 0.6s ease-out;
 }
 
+/* Garantir que a página de chat seja sempre visível */
+.romantic-theme {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Garantir que o conteúdo principal seja visível */
+.romantic-theme main {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Garantir que a área de mensagens seja visível */
+.romantic-theme .overflow-y-auto {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
 /* Tipografia romântica */
 .romantic-title {
   font-family: 'Playfair Display', serif;

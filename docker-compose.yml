@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Frontend React
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - lovelove-network
+
+  # Frontend para desenvolvimento (opcional)
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=https://lovelove-back-1.onrender.com
+    restart: unless-stopped
+    networks:
+      - lovelove-network
+
+  # Ngrok para expor a aplicação
+  ngrok:
+    image: ngrok/ngrok:latest
+    ports:
+      - "4040:4040"  # Interface web do ngrok
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-}  # Token do ngrok (opcional)
+    command: http://frontend:80  # Aponta para o container frontend
+    depends_on:
+      - frontend
+    networks:
+      - lovelove-network
+    restart: unless-stopped
+
+  # Ngrok para desenvolvimento
+  ngrok-dev:
+    image: ngrok/ngrok:latest
+    ports:
+      - "4041:4040"  # Interface web do ngrok (porta diferente)
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-}  # Token do ngrok (opcional)
+    command: http://frontend-dev:5173  # Aponta para o container de desenvolvimento
+    depends_on:
+      - frontend-dev
+    networks:
+      - lovelove-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: lovelove_postgres
+    environment:
+      POSTGRES_DB: lovelove
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: paiva123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+networks:
+  lovelove-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

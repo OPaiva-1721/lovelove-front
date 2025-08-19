@@ -11,4 +11,32 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '.ngrok-free.app',  // Permite todos os subdomínios do ngrok
+      '.ngrok.io',        // Permite domínios antigos do ngrok
+      '.ngrok.app',       // Permite novos domínios do ngrok
+    ],
+    hmr: {
+      clientPort: 5173,
+    },
+    proxy: {
+      '/api': {
+        target: 'https://lovelove-back-1.onrender.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path,
+      },
+      '/static': {
+        target: 'https://lovelove-back-1.onrender.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path,
+      },
+    },
+  },
 })
