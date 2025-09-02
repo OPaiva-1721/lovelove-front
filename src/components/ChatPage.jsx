@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Send, Heart } from 'lucide-react';
-import { buildApiUrl, getUploadUrl } from '../config/api';
+import { buildApiUrl } from '../config/api';
 
 const ChatPage = ({ onNavigate }) => {
   const [messages, setMessages] = useState([]);  // Armazena as mensagens
@@ -12,13 +12,10 @@ const ChatPage = ({ onNavigate }) => {
   const [renderError, setRenderError] = useState(false);  // Estado de erro de renderização
   const messagesEndRef = useRef(null);  // Ref para rolar até o final das mensagens
 
-  // Debug: Log quando o componente é montado
+  // Inicialização do componente
   useEffect(() => {
     try {
-      console.log('ChatPage montada com sucesso');
-      console.log('senderId:', senderId);
-      console.log('receiverId:', receiverId);
-      console.log('Token:', localStorage.getItem('token'));
+      // Componente montado com sucesso
     } catch (err) {
       console.error('Erro ao montar ChatPage:', err);
       setRenderError(true);
@@ -28,7 +25,6 @@ const ChatPage = ({ onNavigate }) => {
   // Buscar mensagens do servidor quando o receiverId mudar
   useEffect(() => {
     try {
-      console.log('Iniciando busca de mensagens para receiverId:', receiverId);
       if (receiverId) {
         fetchMessages(receiverId);
       }
@@ -41,15 +37,12 @@ const ChatPage = ({ onNavigate }) => {
   // Função para buscar mensagens do backend
   const fetchMessages = async (receiverId) => {
     try {
-      console.log('fetchMessages chamada com receiverId:', receiverId);
       setLoading(true);
       setError(null);
       
       const token = localStorage.getItem('token');
-      console.log('Token encontrado:', !!token);
       
       if (!token) {
-        console.warn('Token não encontrado, usando dados mock');
         // Dados mock para demonstração
         const mockMessages = [
           {
@@ -65,27 +58,22 @@ const ChatPage = ({ onNavigate }) => {
             timestamp: new Date().toISOString()
           }
         ];
-        console.log('Definindo mensagens mock:', mockMessages);
         setMessages(mockMessages);
         setLoading(false);
         return;
       }
 
-      console.log('Fazendo requisição para API...');
       const response = await fetch(buildApiUrl(`/api/messages/${receiverId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         }
       });
 
-      console.log('Resposta da API:', response.status, response.statusText);
-
       if (!response.ok) {
         throw new Error(`Erro ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('Dados recebidos da API:', data);
       setMessages(data);
     } catch (err) {
       console.error('Erro ao buscar mensagens:', err);
@@ -106,10 +94,8 @@ const ChatPage = ({ onNavigate }) => {
           timestamp: new Date().toISOString()
         }
       ];
-      console.log('Definindo mensagens de fallback:', fallbackMessages);
       setMessages(fallbackMessages);
     } finally {
-      console.log('Finalizando carregamento');
       setLoading(false);
     }
   };
@@ -121,37 +107,11 @@ const ChatPage = ({ onNavigate }) => {
     try {
       if (!newMessage.trim()) return;  // Não envia mensagem vazia
 
-      console.log('Enviando mensagem:', newMessage);
       const currentSenderId = localStorage.getItem('user_id') || senderId;
       const recipientId = receiverId;
 
       if (!recipientId) {
         console.error("O ID do destinatário não foi definido.");
-        return;
-      }
-
-      // Verificar se está em modo offline
-      const isOfflineMode = localStorage.getItem('offline_mode') === 'true';
-      
-      if (isOfflineMode) {
-        // Modo offline - salvar localmente
-        const offlineMessage = {
-          id: Date.now(),
-          content: newMessage,
-          sender_id: currentSenderId,
-          timestamp: new Date().toISOString(),
-          subject: 'Mensagem offline'
-        };
-        
-        // Salvar no localStorage
-        const savedMessages = JSON.parse(localStorage.getItem('offline_messages') || '[]');
-        savedMessages.push(offlineMessage);
-        localStorage.setItem('offline_messages', JSON.stringify(savedMessages));
-        
-        // Adicionar à lista local
-        setMessages(prev => [...prev, offlineMessage]);
-        setNewMessage('');
-        console.log('Mensagem salva em modo offline');
         return;
       }
 
@@ -163,22 +123,13 @@ const ChatPage = ({ onNavigate }) => {
         timestamp: new Date().toISOString()
       };
       
-      console.log('Adicionando mensagem temporária:', tempMessage);
       setMessages(prev => [...prev, tempMessage]);
       setNewMessage('');  // Limpa a mensagem após o envio
 
       const token = localStorage.getItem('token');
       if (!token) {
-        console.warn('Token não encontrado, mensagem salva apenas localmente');
         return;
       }
-
-      console.log('Enviando requisição para:', buildApiUrl('/api/messages'));
-      console.log('Dados enviados:', {
-        content: newMessage,
-        sender_id: currentSenderId,
-        receiver_id: recipientId,
-      });
 
       const response = await fetch(buildApiUrl('/api/messages'), {
         method: 'POST',
@@ -194,22 +145,14 @@ const ChatPage = ({ onNavigate }) => {
         }),
       });
 
-      console.log('Resposta da API:', response.status, response.statusText);
-
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Erro detalhado:', errorText);
         console.error('Status:', response.status);
-        console.error('Headers:', response.headers);
         throw new Error(`Erro ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const responseData = await response.json();
-      console.log('Resposta da API (dados):', responseData);
-
-      // Se o envio foi bem-sucedido, não precisa recarregar tudo
-      // A mensagem já foi adicionada localmente
-      console.log('Mensagem enviada com sucesso!');
     } catch (err) {
       console.error('Erro ao enviar mensagem:', err);
       // Em caso de erro, mantém a mensagem localmente mas marca como não enviada
@@ -252,15 +195,6 @@ const ChatPage = ({ onNavigate }) => {
     scrollToBottom();
   }, [messages]);
 
-  console.log('Renderizando ChatPage com:', {
-    loading,
-    error,
-    messagesCount: messages.length,
-    senderId,
-    receiverId,
-    renderError
-  });
-
   // Fallback de emergência se houver erro de renderização
   if (renderError) {
     return (
@@ -299,7 +233,6 @@ const ChatPage = ({ onNavigate }) => {
 
   // Se estiver carregando, mostra um indicador
   if (loading && messages.length === 0) {
-    console.log('Mostrando tela de carregamento');
     return (
       <div className="romantic-theme min-h-screen flex flex-col">
         <header className="romantic-header py-4 px-4 flex-shrink-0">
@@ -329,7 +262,6 @@ const ChatPage = ({ onNavigate }) => {
     );
   }
 
-  console.log('Renderizando chat principal');
   return (
     <div className="romantic-theme min-h-screen flex flex-col">
       {/* Cabeçalho */}

@@ -6,23 +6,17 @@ import FeedPage from './components/FeedPage';
 import ChatPage from './components/ChatPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
-import DebugMenu from './components/DebugMenu';
 
 function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Debug: Log da rota atual
-  console.log('Rota atual:', location.pathname);
-
   const handleNavigate = (path) => {
-    console.log('Navegando para:', path);
     navigate(path);
   };
 
   return (
     <div className="App">
-      <DebugMenu />
       <Routes>
         {/* Página Inicial (HomePage) */}
         <Route path="/" element={<HomePage onNavigate={handleNavigate} />} />

@@ -26,13 +26,13 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'https://lovelove-back-1.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path,
       },
       '/static': {
-        target: 'https://lovelove-back-1.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path,

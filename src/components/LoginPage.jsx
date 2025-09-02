@@ -29,7 +29,6 @@ const LoginPage = () => {
       });
 
       const data = await response.json();
-      console.log('Resposta completa do login:', data);
 
       if (data.access_token) {
         localStorage.setItem('token', data.access_token);
@@ -39,10 +38,6 @@ const LoginPage = () => {
         } else if (data.user && data.user.id) {
           localStorage.setItem('user_id', data.user.id);
         }
-        console.log('Login realizado com sucesso:', {
-          token: data.access_token ? 'Token salvo' : 'Token não encontrado',
-          userId: localStorage.getItem('user_id') || 'User ID não encontrado'
-        });
         navigate('/');
       } else {
         setError(data.error || 'Credenciais inválidas');

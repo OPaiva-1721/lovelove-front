@@ -1,11 +1,9 @@
 // Configuração da API
-// Permite alternar rapidamente entre diferentes URLs
 
 // URLs disponíveis
 const API_URLS = {
   localhost: 'http://localhost:5000',  // Backend local (Flask)
   render: 'https://lovelove-back-1.onrender.com',  // Backend no Render
-  // Adicione mais URLs conforme necessário
 };
 
 // Função para obter a URL atual
@@ -27,36 +25,6 @@ const getCurrentApiUrl = () => {
   return isDevelopment ? API_URLS.localhost : API_URLS.render;
 };
 
-// Função para alternar rapidamente a URL
-export const switchApiUrl = (urlKey) => {
-  if (API_URLS[urlKey]) {
-    localStorage.setItem('forcedApiUrl', API_URLS[urlKey]);
-    console.log(`🌐 API URL alterada para: ${API_URLS[urlKey]}`);
-    // Recarrega a página para aplicar a mudança
-    window.location.reload();
-  } else {
-    console.error(`❌ URL não encontrada: ${urlKey}. URLs disponíveis:`, Object.keys(API_URLS));
-  }
-};
-
-// Função para resetar para a URL padrão
-export const resetApiUrl = () => {
-  localStorage.removeItem('forcedApiUrl');
-  console.log('🔄 API URL resetada para padrão');
-  window.location.reload();
-};
-
-// Função para mostrar a URL atual
-export const getCurrentApiUrlInfo = () => {
-  const currentUrl = getCurrentApiUrl();
-  const isForced = localStorage.getItem('forcedApiUrl');
-  return {
-    url: currentUrl,
-    isForced: !!isForced,
-    availableUrls: Object.keys(API_URLS)
-  };
-};
-
 const API_BASE_URL = getCurrentApiUrl();
 
 // Função para construir URLs completas
@@ -73,8 +41,5 @@ export default {
   BASE_URL: API_BASE_URL,
   buildApiUrl,
   getUploadUrl,
-  switchApiUrl,
-  resetApiUrl,
-  getCurrentApiUrlInfo,
   API_URLS
 };

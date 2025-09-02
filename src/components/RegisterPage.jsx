@@ -39,10 +39,6 @@ const RegisterPage = () => {
         } else if (data.user && data.user.id) {
           localStorage.setItem('user_id', data.user.id);
         }
-        console.log('Registro realizado com sucesso:', {
-          token: data.access_token ? 'Token salvo' : 'Token não encontrado',
-          userId: localStorage.getItem('user_id') || 'User ID não encontrado'
-        });
         navigate('/feed');
       } else {
         setError(data.error || 'Erro ao registrar');
