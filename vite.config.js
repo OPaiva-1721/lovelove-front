@@ -24,19 +24,5 @@ export default defineConfig({
     hmr: {
       clientPort: 5173,
     },
-    proxy: {
-      '/api': {
-        target: 'https://0a22eca0af3c.ngrok-free.app',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path,
-      },
-      '/static': {
-        target: 'https://0a22eca0af3c.ngrok-free.app',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path,
-      },
-    },
   },
 })

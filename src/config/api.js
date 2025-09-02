@@ -1,31 +1,7 @@
 // Configuração da API
 
-// URLs disponíveis
-const API_URLS = {
-  localhost: 'http://localhost:5000',  // Backend local (Flask)
-  render: 'https://lovelove-back-1.onrender.com',  // Backend no Render
-};
-
-// Função para obter a URL atual
-const getCurrentApiUrl = () => {
-  // 1. Primeiro, verifica se há uma URL forçada no localStorage
-  const forcedUrl = localStorage.getItem('forcedApiUrl');
-  if (forcedUrl) {
-    return forcedUrl;
-  }
-
-  // 2. Verifica se há uma variável de ambiente específica
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
-    return envUrl;
-  }
-
-  // 3. Usa a lógica padrão de desenvolvimento vs produção
-  const isDevelopment = import.meta.env.DEV;
-  return isDevelopment ? API_URLS.localhost : API_URLS.render;
-};
-
-const API_BASE_URL = getCurrentApiUrl();
+// URL do backend via ngrok
+const API_BASE_URL = 'https://0a22eca0af3c.ngrok-free.app';
 
 // Função para construir URLs completas
 export const buildApiUrl = (endpoint) => {
@@ -40,6 +16,5 @@ export const getUploadUrl = (filename) => {
 export default {
   BASE_URL: API_BASE_URL,
   buildApiUrl,
-  getUploadUrl,
-  API_URLS
+  getUploadUrl
 };
