@@ -26,13 +26,13 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://0a22eca0af3c.ngrok-free.app',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path,
       },
       '/static': {
-        target: 'http://localhost:5000',
+        target: 'https://0a22eca0af3c.ngrok-free.app',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path,
