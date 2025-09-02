@@ -1,7 +1,7 @@
 // Configuração da API
 
-// URL do backend via ngrok
-const API_BASE_URL = 'https://0a22eca0af3c.ngrok-free.app';
+// URL do backend - usa variável de ambiente ou fallback para local
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Função para construir URLs completas
 export const buildApiUrl = (endpoint) => {
